@@ -3,12 +3,14 @@
 Script para quem precisa pegar coordenadas em massa.
 
 **O que da para configurar pelo config.lua?**
+
 Nome do comando; Permissão; Tipo da CDS; Linguagem;
 
 Como funciona?
+
 Ao iniciar a criação de blips, irá criar um arquivo dentro da pasta **blips** como o nome referente ao seu ID, que aparecerá as coordenada toda vez que você apertar E, definido pelo "type" dentro do config.lua
 
-OBS: Não deletar a pasta 'blips'!! Caso contrario não irá funcionar.
+OBS: Não deletar a pasta blips!! Caso contrario não irá funcionar.
 
 **Suporte em nosso discord!**
 
