@@ -1,6 +1,6 @@
 # RKG_Create_Blips
 
-Oque É?
+Oque é?
 
 Script para quem precisa pegar coordenadas em massa, com os BLIPs syncados para todos que estão na criação de blips.
 
