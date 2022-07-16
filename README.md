@@ -1,6 +1,8 @@
 # RKG_Create_Blips
 
-Script para quem precisa pegar coordenadas em massa.
+Oque É?
+
+Script para quem precisa pegar coordenadas em massa, com os BLIPs syncados para todos que estão na criação de blips.
 
 **O que da para configurar pelo config.lua?**
 
