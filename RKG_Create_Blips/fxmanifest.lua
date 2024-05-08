@@ -2,24 +2,25 @@ fx_version 'bodacious'
 game 'gta5'
 
 name 'RKG_Create_Blips'
-author '@Rurian#4410'
-version '1.0'
+author '@rurian'
+version '2.0'
 discord 'https://dsc.gg/rkgstore'
 
+files {
+	'config/*.lua',
+}
+
 shared_script {
-	'@vrp/lib/utils.lua',
-	
-	'config/config.lua'
+	'lib/utils.lua',
+	'lib/Tools.lua',
+	'lib/Proxy.lua',
+	'lib/Tunnel.lua'
 }
 
 server_scripts {
-	'config/server/functions.lua',
-
-	'server/server.lua'
+	'server/*.lua'
 }
 
 client_scripts {
-	'config/client/functions.lua',
-	
-	'client/client.lua'
+	'client/*.lua'
 }

@@ -1,83 +1,92 @@
-local Tunnel = module('vrp', 'lib/Tunnel')
+_G.Creation = {
+    blips = {}, 
+    players = {}
+}
 
-apiClient = Tunnel.getInterface('RKG_Store:Create_Blips')
+LANGUAGE = module('config/language')
+GENERAL_CONFIG = module('config/general')
 
-api = {}
-Tunnel.bindInterface('RKG_Store:Create_Blips', api)
+local RESOURCE_NAME = GetCurrentResourceName()
+local RESOURCE_PATH = GetResourcePath(RESOURCE_NAME)
 
-local usersInCreateBlips = {}
-local resourcePath = GetResourcePath(GetCurrentResourceName())
-
-GlobalState.RegisteredBlips = {}
-
-RegisterCommand(globalConfig.Command, function(source)
-    local source = source
-
-    if serverConfig.userCanEnterBlipCreation(source) then
-        if not isUserInCreation(source) then
-            insertUserInCreation(source)
-
-            apiClient.insertPlayerInCreateBlips(source)
-
-            globalConfig.notify(source, 1, globalConfig.Language.InitBlips, 8000)
-        else
-            globalConfig.notify(source, 2, globalConfig.Language.AlredyBlips, 8000)
-        end
-    end
-end)
-
-RegisterServerEvent('RKG_Store:StoreBlips')
-AddEventHandler('RKG_Store:StoreBlips', function(coords, heading)
-    local source = source
-
-    if isUserInCreation(source) then
-        local userName = GetPlayerName(source)
-
-        local registeredBlips = GlobalState.RegisteredBlips
-        
-        table.insert(registeredBlips, coords)
-		
-        GlobalState.RegisteredBlips = registeredBlips
-
-        writeText(tostring(userName)..'_blips.lua', globalConfig.getTextTypeToFormat(coords, heading))
-    end
-end)
-
-function api.exitBlipCreation()
-    if isUserInCreation(source) then
-        removeUserInCreation(source)
-
-        globalConfig.notify(source, 2, globalConfig.Language.ExitBlips, 8000)
-    end
-end
-
-function writeText(archive, text)
-	archive = io.open(resourcePath..'/blips/'..archive, 'a')
+function Creation:WriteText(archive, text)
+	archive = io.open(RESOURCE_PATH..'/blips/'..archive, 'a')
 	
     if archive then
 		archive:write(text..'\n')
-        archive:close()
 	end
+
+    archive:close()
 end
 
-function isUserInCreation(userSource)
-    return usersInCreateBlips[userSource]
+function Creation:RegisterBlip(playerSource, coordinates, heading)
+    local blipEntries = {
+        coordinates, 
+        heading
+    }
+
+    table.insert(self.blips, blipEntries)
+
+    self:TriggerPlayers(playerSource, blipEntries)
+
+    local playerObject = self:GetPlayer(playerSource)
+    local stringToFormat = GENERAL_CONFIG.TYPES[playerObject.type]
+    local archiveName = GENERAL_CONFIG.GENERATE_ARCHIVE_NAME(playerSource)
+    local formattedText = GENERAL_CONFIG.FORMAT_TEXT(stringToFormat, coordinates, heading)
+
+    self:WriteText(archiveName, formattedText)
 end
 
-function insertUserInCreation(userSource)
-    if not usersInCreateBlips[userSource] then
-        usersInCreateBlips[userSource] = true
+function Creation:TriggerPlayers(ignoreSource, ...)
+    for playerSource in pairs(self.players) do
+        if ignoreSource ~= playerSource then
+            TriggerClientEvent('RKG_Create_Blips:InsertBlip', playerSource, ...)
+        end
     end
 end
 
-function removeUserInCreation(userSource)
-    if usersInCreateBlips[userSource] then
-        usersInCreateBlips[userSource] = nil
+function Creation:GetBlips()
+    return self.blips
+end
+
+function Creation:InsertPlayer(playerSource)
+    if not self.players[playerSource] then
+        self.players[playerSource] = {
+            type = 1
+        }
     end
+end
+
+function Creation:RemovePlayer(playerSource)
+    if self.players[playerSource] then
+        self.players[playerSource] = nil
+    end
+end
+
+function Creation:UpdatePlayerType(playerSource, newType)
+    if self.players[playerSource] then
+        self.players[playerSource].type = newType
+    end
+end
+
+function Creation:GetPlayer(playerSource)
+    return self.players[playerSource]
 end
 
 AddEventHandler('playerDropped', function(reason)
-    local source = source
+    local playerSource = source
 
-    removeUserInCreation(source)
+    Creation:RemovePlayer(playerSource)
+end)
+
+RegisterNetEvent('RKG_Create_Blips:Register', function(coordinates, heading)
+    local playerSource = source
+
+    Creation:RegisterBlip(playerSource, coordinates, heading)
+end)
+
+RegisterNetEvent('RKG_Create_Blips:UpdatePlayerType', function(newType)
+    local playerSource = source
+
+    Creation:UpdatePlayerType(playerSource, newType)
 end)
